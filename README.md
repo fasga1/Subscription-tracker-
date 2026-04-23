@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Subscription Tracker
 
-## Getting Started
+> Простой и удобный трекер для управления всеми семейными подписками.
 
-First, run the development server:
+### Основные возможности:
+*   **Группировка:** Разделение подписок по людям (Мама, Папа, Брат, Общие).
+*   **Дашборд:** Мгновенный обзор общей суммы расходов в месяц.
+*   **Напоминания:** Автоматические уведомления на почту за 7, 3 и 1 день до списания.
+*   **Быстрая оплата:** Прямые ссылки на страницы оплаты сервисов.
+*   **Безопасность:** Доступ только по личному Google-аккаунту.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Инструкция для пользователей (Семья)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 1. Как войти
+1. Открой ссылку на приложение (ссылка в закрепе или ниже).
+2. Нажми кнопку **"Войти через Google"**.
+3. Разреши доступ к базовой информации (имя и email).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 2. Как добавить подписку
+1. Нажми на кнопку **➕ (Плюс)** в углу экрана.
+2. Заполни поля:
+   *   **Сервис:** (например, *Яндекс.Плюс*).
+   *   **Стоимость:** Сумма списания.
+   *   **Дата:** Когда обычно списывают деньги.
+   *   **Ссылка:** Скопируй ссылку из письма от сервиса, чтобы потом быстро перейти к оплате.
+3. Выбери **Группу** (Кому принадлежит подписка?).
+4. Нажми **Сохранить**.
 
-## Learn More
+### 3. Как пользоваться карточками
+*   **Цветные метки:** Если дата списания близка (меньше 7 дней), карточка подсветится желтым или красным.
+*   **Кнопка "Оплатить":** Открывает страницу сервиса в новой вкладке.
+*   **Удаление:** Если отменили подписку, открой её и нажми "Удалить" или "Деактивировать".
 
-To learn more about Next.js, take a look at the following resources:
+### 4. Напоминания
+Тебе не нужно ничего настраивать. Если до даты оплаты осталось **7, 3 или 1 день**, система автоматически отправит письмо на твой email с напоминанием.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Для разработчиков (Tech Stack)
 
-## Deploy on Vercel
+Если ты хочешь запустить проект локально или внести изменения:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Стек технологий
+*   **Frontend:** Next.js 14 (App Router), React, TypeScript, TailwindCSS, shadcn/ui.
+*   **Backend/DB:** Supabase (PostgreSQL, Auth, RLS).
+*   **Hosting:** Vercel.
+*   **Notifications:** Resend (Email), Vercel Cron.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+###  Локальный запуск
+
+1.  **Клонируй репозиторий:**
+    ```bash
+    git clone https://github.com/your-username/subscription-tracker.git
+    cd subscription-tracker
+    ```
+
+2.  **Установи зависимости:**
+    ```bash
+    npm install
+    ```
+
+3.  **Настрой переменные окружения:**
+    Создай файл `.env.local` в корне и заполни его (примеры в `.env.local.example`):
+    ```env
+    NEXT_PUBLIC_SUPABASE_URL=...
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+    RESEND_API_KEY=...
+    # и другие ключи
+    ```
+
+4.  **Запусти сервер разработки:**
+    ```bash
+    npm run dev
+    ```
+    Открой [http://localhost:3000](http://localhost:3000) в браузере.
+
+### Структура базы данных (Supabase)
+Проект использует Row Level Security (RLS). Убедись, что применил политики из папки `supabase/policies.sql`.
+
+*   `profiles` — данные пользователей.
+*   `groups` — категории (Семья, Личные).
+*   `subscriptions` — сами подписки.
+
+---
+
+##  Поддержка
+Если что-то сломалось или есть идея для улучшения — пиши мне в личные сообщения или создай Issue в этом репозитории.
