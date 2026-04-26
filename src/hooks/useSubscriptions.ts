@@ -17,9 +17,11 @@ interface UseSubscriptionsResult {
   loading: boolean;
   submitting: boolean;
   creatingGroup: boolean;
+  deletingGroupId: string | null;
   error: string | null;
   refresh: () => Promise<void>;
   createGroup: (name: string, color: string) => Promise<boolean>;
+  deleteGroup: (groupId: string) => Promise<boolean>;
   createSubscription: (values: SubscriptionFormValues) => Promise<boolean>;
   updateSubscription: (
     subscriptionId: string,
@@ -73,6 +75,7 @@ export function useSubscriptions(): UseSubscriptionsResult {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [creatingGroup, setCreatingGroup] = useState(false);
+  const [deletingGroupId, setDeletingGroupId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
@@ -285,6 +288,40 @@ export function useSubscriptions(): UseSubscriptionsResult {
     return true;
   }, []);
 
+  const deleteGroup = useCallback(
+    async (groupId: string) => {
+      setError(null);
+      setDeletingGroupId(groupId);
+
+      const existingGroups = groups;
+      if (existingGroups.length <= 1) {
+        setDeletingGroupId(null);
+        setError("Нельзя удалить последнюю группу.");
+        return false;
+      }
+
+      const supabase = createSupabaseBrowserClient();
+      const { error: deleteGroupError } = await supabase
+        .from("groups")
+        .delete()
+        .eq("id", groupId);
+
+      if (deleteGroupError) {
+        setDeletingGroupId(null);
+        setError(deleteGroupError.message);
+        return false;
+      }
+
+      setGroups((prev) => prev.filter((group) => group.id !== groupId));
+      setSubscriptions((prev) =>
+        prev.filter((subscription) => subscription.group_id !== groupId)
+      );
+      setDeletingGroupId(null);
+      return true;
+    },
+    [groups]
+  );
+
   return useMemo(
     () => ({
       subscriptions,
@@ -292,9 +329,11 @@ export function useSubscriptions(): UseSubscriptionsResult {
       loading,
       submitting,
       creatingGroup,
+      deletingGroupId,
       error,
       refresh,
       createGroup,
+      deleteGroup,
       createSubscription,
       updateSubscription,
       deleteSubscription,
@@ -305,9 +344,11 @@ export function useSubscriptions(): UseSubscriptionsResult {
       loading,
       submitting,
       creatingGroup,
+      deletingGroupId,
       error,
       refresh,
       createGroup,
+      deleteGroup,
       createSubscription,
       updateSubscription,
       deleteSubscription,

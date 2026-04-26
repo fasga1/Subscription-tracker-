@@ -32,9 +32,11 @@ export function DashboardClient() {
     loading,
     submitting,
     creatingGroup,
+    deletingGroupId,
     error,
     refresh,
     createGroup,
+    deleteGroup,
     createSubscription,
     updateSubscription,
     deleteSubscription,
@@ -49,6 +51,14 @@ export function DashboardClient() {
 
   async function handleDelete(subscriptionId: string) {
     await deleteSubscription(subscriptionId);
+  }
+
+  async function handleDeleteGroup(groupId: string) {
+    const deleted = await deleteGroup(groupId);
+    if (deleted && selectedGroupId === groupId) {
+      setSelectedGroupId("all");
+    }
+    return deleted;
   }
 
   const sidebarGroups = useMemo(
@@ -99,8 +109,10 @@ export function DashboardClient() {
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[260px_1fr]">
       <AppSidebar
         creatingGroup={creatingGroup}
+        deletingGroupId={deletingGroupId}
         groups={sidebarGroups}
         onCreateGroup={createGroup}
+        onDeleteGroup={handleDeleteGroup}
         onSelectGroup={setSelectedGroupId}
         selectedGroupId={selectedGroupId}
       />
@@ -132,7 +144,9 @@ export function DashboardClient() {
           </div>
         ) : null}
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_220px]">
+        <BillingSummary subscriptions={filteredSubscriptions} />
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_280px]">
           <Input
             placeholder="Поиск по названию сервиса"
             value={searchQuery}
@@ -143,7 +157,9 @@ export function DashboardClient() {
             onValueChange={(value) => setSortMode((value as SortMode) ?? "next-billing")}
           >
             <SelectTrigger className="w-full">
-              <span>{selectedSortLabel}</span>
+              <span className="block flex-1 truncate pr-2 text-left">
+                {selectedSortLabel}
+              </span>
             </SelectTrigger>
             <SelectContent>
               {SORT_OPTIONS.map((option) => (
@@ -154,8 +170,6 @@ export function DashboardClient() {
             </SelectContent>
           </Select>
         </div>
-
-        <BillingSummary subscriptions={filteredSubscriptions} />
 
         {loading ? (
           <p className="text-sm text-muted-foreground">Загрузка подписок...</p>

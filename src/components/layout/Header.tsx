@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { createSupabaseBrowserClient } from "@/lib/supabase-client";
 
@@ -28,6 +29,7 @@ export function Header() {
     <header className="flex items-center justify-between border-b p-4">
       <p className="text-sm text-muted-foreground">Dashboard</p>
       <div className="flex items-center gap-2">
+        <ThemeToggle />
         <div className="flex size-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
           {userInitial}
         </div>

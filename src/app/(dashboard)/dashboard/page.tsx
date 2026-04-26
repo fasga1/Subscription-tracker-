@@ -1,4 +1,5 @@
 import { DashboardClient } from "@/components/features/DashboardClient";
+import { ensureProfileExists } from "@/lib/profile";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 export default async function DashboardPage() {
@@ -6,6 +7,10 @@ export default async function DashboardPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (user) {
+    await ensureProfileExists(supabase, user);
+  }
 
   return (
     <section className="space-y-4">
