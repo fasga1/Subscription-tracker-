@@ -20,7 +20,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import {
   subscriptionFormSchema,
@@ -39,6 +38,27 @@ interface AddSubscriptionModalProps {
 }
 
 const DEFAULT_CURRENCY = "RUB";
+
+function getReadableGroupName(group: Group): string {
+  const trimmedName = group.name.trim();
+  const isMachineLike = /^[a-z0-9-]{20,}$/i.test(trimmedName);
+  if (!trimmedName || isMachineLike) {
+    return `Группа ${group.id.slice(0, 6)}`;
+  }
+
+  return trimmedName;
+}
+
+function getBillingCycleLabel(cycle: Subscription["billing_cycle"]): string {
+  if (cycle === "daily") {
+    return "Ежедневно";
+  }
+  if (cycle === "monthly") {
+    return "Ежемесячно";
+  }
+
+  return "Ежегодно";
+}
 
 export function AddSubscriptionModal({
   groups,
@@ -67,6 +87,10 @@ export function AddSubscriptionModal({
     control: form.control,
     name: "billing_cycle",
   });
+  const selectedGroup = groups.find((group) => group.id === selectedGroupId);
+  const selectedGroupName = selectedGroup
+    ? getReadableGroupName(selectedGroup)
+    : "Выберите группу";
 
   useEffect(() => {
     if (!open) {
@@ -136,12 +160,12 @@ export function AddSubscriptionModal({
               }
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Выберите группу" />
+                <span>{selectedGroupName}</span>
               </SelectTrigger>
               <SelectContent>
                 {groups.map((group) => (
                   <SelectItem key={group.id} value={group.id}>
-                    {group.name}
+                    {getReadableGroupName(group)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -207,7 +231,7 @@ export function AddSubscriptionModal({
                 }
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Цикл" />
+                  <span>{getBillingCycleLabel(selectedBillingCycle ?? "monthly")}</span>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="daily">Ежедневно</SelectItem>

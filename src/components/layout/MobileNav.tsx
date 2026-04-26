@@ -1,12 +1,12 @@
 interface MobileNavProps {
-  selectedTab?: "dashboard" | "groups" | "reminders" | "profile";
+  selectedTab?: "dashboard" | "groups" | "subscriptions" | "profile";
 }
 
 export function MobileNav({ selectedTab = "dashboard" }: MobileNavProps) {
   const tabs = [
     { id: "dashboard", label: "Главная" },
     { id: "groups", label: "Группы" },
-    { id: "reminders", label: "Напоминания" },
+    { id: "subscriptions", label: "Подписки" },
     { id: "profile", label: "Профиль" },
   ] as const;
 

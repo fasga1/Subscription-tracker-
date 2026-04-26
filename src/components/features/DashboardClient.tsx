@@ -12,12 +12,18 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
 import type { Subscription } from "@/types";
 
 type SortMode = "next-billing" | "cost-desc" | "cost-asc" | "service";
+
+const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
+  { value: "next-billing", label: "По ближайшей дате" },
+  { value: "cost-desc", label: "По стоимости (сначала дорогие)" },
+  { value: "cost-asc", label: "По стоимости (сначала дешевые)" },
+  { value: "service", label: "По названию сервиса" },
+];
 
 export function DashboardClient() {
   const {
@@ -82,6 +88,13 @@ export function DashboardClient() {
     return sorted;
   }, [subscriptions, searchQuery, selectedGroupId, sortMode]);
 
+  const selectedSortLabel = useMemo(
+    () =>
+      SORT_OPTIONS.find((option) => option.value === sortMode)?.label ??
+      "Сортировка",
+    [sortMode]
+  );
+
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[260px_1fr]">
       <AppSidebar
@@ -130,13 +143,14 @@ export function DashboardClient() {
             onValueChange={(value) => setSortMode((value as SortMode) ?? "next-billing")}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Сортировка" />
+              <span>{selectedSortLabel}</span>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="next-billing">По ближайшей дате</SelectItem>
-              <SelectItem value="cost-desc">По стоимости (убыв.)</SelectItem>
-              <SelectItem value="cost-asc">По стоимости (возр.)</SelectItem>
-              <SelectItem value="service">По названию сервиса</SelectItem>
+              {SORT_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

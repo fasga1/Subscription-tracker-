@@ -3,10 +3,10 @@ import { type NextRequest, NextResponse } from "next/server";
 import { supabaseAnonKey, supabaseUrl, type Database } from "@/lib/supabase";
 
 const AUTH_PATHS = ["/login", "/auth/callback"];
-const PROTECTED_PATHS = ["/"];
+const PROTECTED_PATHS = ["/dashboard"];
 
 function isProtectedPath(pathname: string): boolean {
-  return PROTECTED_PATHS.some((path) => pathname === path);
+  return PROTECTED_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 }
 
 function isAuthPath(pathname: string): boolean {
@@ -50,7 +50,7 @@ export async function updateSession(request: NextRequest) {
 
   if (user && isAuthPath(request.nextUrl.pathname)) {
     const url = request.nextUrl.clone();
-    url.pathname = "/";
+    url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 

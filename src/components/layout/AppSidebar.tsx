@@ -21,6 +21,16 @@ interface AppSidebarProps {
 
 const ALL_GROUPS_ID = "all";
 
+function getReadableGroupName(name: string, id: string): string {
+  const trimmedName = name.trim();
+  const isMachineLike = /^[a-z0-9-]{20,}$/i.test(trimmedName);
+  if (!trimmedName || isMachineLike) {
+    return `Группа ${id.slice(0, 6)}`;
+  }
+
+  return trimmedName;
+}
+
 export function AppSidebar({
   groups,
   selectedGroupId = ALL_GROUPS_ID,
@@ -80,7 +90,7 @@ export function AppSidebar({
                   className="size-2 rounded-full"
                   style={{ backgroundColor: group.color }}
                 />
-                {group.name}
+                {getReadableGroupName(group.name, group.id)}
               </span>
               <span>{group.count}</span>
             </Button>

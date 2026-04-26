@@ -13,6 +13,16 @@ interface SubscriptionCardProps {
   isSubmitting: boolean;
 }
 
+function getReadableGroupName(name: string | undefined, id: string): string {
+  const trimmedName = (name ?? "").trim();
+  const isMachineLike = /^[a-z0-9-]{20,}$/i.test(trimmedName);
+  if (!trimmedName || isMachineLike) {
+    return `Группа ${id.slice(0, 6)}`;
+  }
+
+  return trimmedName;
+}
+
 function getBillingCycleLabel(cycle: Subscription["billing_cycle"]): string {
   switch (cycle) {
     case "daily":
@@ -33,8 +43,8 @@ export function SubscriptionCard({
   onDelete,
   isSubmitting,
 }: SubscriptionCardProps) {
-  const groupName =
-    groups.find((group) => group.id === subscription.group_id)?.name ?? "Без группы";
+  const matchedGroup = groups.find((group) => group.id === subscription.group_id);
+  const groupName = getReadableGroupName(matchedGroup?.name, subscription.group_id);
   const billingDate = format(parseISO(subscription.next_billing_date), "d MMMM yyyy", {
     locale: ru,
   });

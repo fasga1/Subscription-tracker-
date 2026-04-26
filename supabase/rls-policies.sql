@@ -4,50 +4,50 @@ ALTER TABLE groups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE group_members ENABLE ROW LEVEL SECURITY;
 
+-- Drop legacy policies to avoid recursive policy chains.
+DROP POLICY IF EXISTS "Users see own profile" ON profiles;
+DROP POLICY IF EXISTS "Groups access" ON groups;
+DROP POLICY IF EXISTS "Subscriptions access" ON subscriptions;
+DROP POLICY IF EXISTS "Group members access" ON group_members;
+
 -- Profiles: user can access only own profile.
 CREATE POLICY "Users see own profile"
 ON profiles
 FOR ALL
-USING (auth.uid() = id);
+USING (auth.uid() = id)
+WITH CHECK (auth.uid() = id);
 
--- Groups: owner and group members can access.
-CREATE POLICY "Groups access"
+-- Groups: owner-only access for now.
+CREATE POLICY "Groups owner access"
 ON groups
 FOR ALL
-USING (
-  auth.uid() = owner_id
-  OR auth.uid() IN (
-    SELECT user_id
-    FROM group_members
-    WHERE group_id = groups.id
-  )
-);
+USING (auth.uid() = owner_id)
+WITH CHECK (auth.uid() = owner_id);
 
--- Subscriptions: available through allowed groups.
-CREATE POLICY "Subscriptions access"
+-- Subscriptions: owner-only access for now.
+CREATE POLICY "Subscriptions owner access"
 ON subscriptions
 FOR ALL
-USING (
-  group_id IN (
-    SELECT id
-    FROM groups
-    WHERE owner_id = auth.uid()
-      OR auth.uid() IN (
-        SELECT user_id
-        FROM group_members
-        WHERE group_id = groups.id
-      )
-  )
-);
+USING (auth.uid() = owner_id)
+WITH CHECK (auth.uid() = owner_id);
 
--- Group members: group owner has full access.
-CREATE POLICY "Group members access"
+-- Group members: owner of related group can manage.
+CREATE POLICY "Group members owner access"
 ON group_members
 FOR ALL
 USING (
-  group_id IN (
-    SELECT id
+  EXISTS (
+    SELECT 1
     FROM groups
-    WHERE owner_id = auth.uid()
+    WHERE groups.id = group_members.group_id
+      AND groups.owner_id = auth.uid()
+  )
+)
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM groups
+    WHERE groups.id = group_members.group_id
+      AND groups.owner_id = auth.uid()
   )
 );
