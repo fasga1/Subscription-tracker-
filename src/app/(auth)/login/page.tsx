@@ -56,7 +56,15 @@ export default function LoginPage() {
     setSuccessMessage(null);
 
     const supabase = createSupabaseBrowserClient();
-    const { error } = await supabase.auth.signUp(values);
+    const emailRedirectTo =
+      process.env.NEXT_PUBLIC_SUPABASE_REDIRECT_URL ??
+      `${window.location.origin}/auth/callback`;
+    const { error } = await supabase.auth.signUp({
+      ...values,
+      options: {
+        emailRedirectTo,
+      },
+    });
 
     if (error) {
       setErrorMessage(error.message);

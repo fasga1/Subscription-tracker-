@@ -1,4 +1,12 @@
-import { addDays, addMonths, addYears, isBefore, parseISO } from "date-fns";
+import {
+  addDays,
+  addMonths,
+  addYears,
+  format,
+  isBefore,
+  parseISO,
+  startOfDay,
+} from "date-fns";
 import type { BillingCycle } from "@/types";
 
 function shiftByCycle(date: Date, cycle: BillingCycle): Date {
@@ -20,10 +28,11 @@ export function calculateNextBillingDate(
   now: Date = new Date()
 ): string {
   let nextDate = parseISO(anchorDate);
+  const today = startOfDay(now);
 
-  while (isBefore(nextDate, now)) {
+  while (isBefore(nextDate, today)) {
     nextDate = shiftByCycle(nextDate, cycle);
   }
 
-  return nextDate.toISOString().split("T")[0] ?? anchorDate;
+  return format(nextDate, "yyyy-MM-dd");
 }

@@ -11,10 +11,15 @@ export async function createSupabaseServerClient() {
         return cookieStore.getAll();
       },
       setAll(cookiesToSet) {
-        // Server components can read cookies but cannot mutate them.
-        // Supabase may attempt to set session cookies during reads, so we
-        // intentionally no-op here and let middleware/route handlers persist.
-        void cookiesToSet;
+        cookiesToSet.forEach(({ name, value, options }) => {
+          try {
+            cookieStore.set(name, value, options);
+          } catch {
+            // In server components cookie mutation is not allowed. This method
+            // is also used in route handlers where set() works, so we silently
+            // ignore only the disallowed runtime case.
+          }
+        });
       },
     },
   });
